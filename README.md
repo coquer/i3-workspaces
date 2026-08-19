@@ -101,3 +101,7 @@ diverge the moment a second monitor exists.
 `readonly property` at binding time can freeze at an empty screen name if the
 widget evaluates before it's fully parented into its window -- this widget
 reads it fresh inside a function on every recompute instead of caching it.
+
+## License
+
+[MIT](LICENSE)
