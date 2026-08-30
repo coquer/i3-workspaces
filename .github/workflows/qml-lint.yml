@@ -17,4 +17,9 @@ jobs:
           QMLLINT=$(dpkg -L qt6-declarative-dev-tools | grep -m1 '/qmllint6\?$')
           echo "QMLLINT=$QMLLINT" >> "$GITHUB_ENV"
       - name: Run qmllint
-        run: find . -name "*.qml" -not -path "./.git/*" -print0 | xargs -0 "$QMLLINT"
+        run: |
+          set +e
+          out=$(find . -name "*.qml" -not -path "./.git/*" -print0 | xargs -0 "$QMLLINT" 2>&1)
+          echo "$out"
+          echo "$out" | grep -q '^Error:' && exit 1
+          exit 0
