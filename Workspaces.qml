@@ -146,9 +146,15 @@ BarWidget {
         id: box
         required property int modelData
 
-        readonly property var workspace: root.workspaceById(box.modelData)
+        readonly property var workspace: {
+          var _ = root.revision
+          return root.workspaceById(box.modelData)
+        }
         readonly property bool active: box.modelData === root.activeId
-        readonly property bool urgent: box.workspace !== null && box.workspace.urgent === true
+        readonly property bool urgent: {
+          var _ = root.revision
+          return box.workspace !== null && box.workspace.urgent === true
+        }
 
         Layout.alignment: Qt.AlignVCenter
         Layout.fillHeight: true
@@ -172,7 +178,7 @@ BarWidget {
         Text {
           id: label
           anchors.centerIn: parent
-          text: box.modelData === 10 ? "0" : String(box.modelData)
+          text: String(box.modelData)
           color: (box.active || box.urgent) ? root.bgColor : root.inactiveColor
           font.bold: box.active || box.urgent
           font.family: root.bar ? root.bar.fontFamily : Style.font.family
