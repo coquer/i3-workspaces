@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
 import qs.Commons
+import qs.Commons as Commons
 import qs.Ui
 
 // i3bar-style workspace indicators: plain numbered boxes, sharp corners,
@@ -13,10 +14,10 @@ BarWidget {
 
   readonly property int maxWorkspaceId: root.setting("maxWorkspaceId", 10)
 
-  readonly property color activeColor: Color.accent
-  readonly property color inactiveColor: Color.muted
-  readonly property color urgentColor: Color.urgent
-  readonly property color bgColor: Color.background
+  readonly property color activeColor: Commons.Color.accent
+  readonly property color inactiveColor: Commons.Color.muted
+  readonly property color urgentColor: Commons.Color.urgent
+  readonly property color bgColor: Commons.Color.background
   readonly property real trailingGap: root.vertical ? 0 : Style.spaceReal(1.5)
 
   // --- which monitor is this bar on -----------------------------------------
