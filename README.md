@@ -3,12 +3,14 @@
 An [Omarchy](https://omarchy.org) bar widget: i3bar-style workspace numbers,
 one per monitor.
 
-Stock `omarchy.workspaces` shows the same global workspace list on every bar
-surface, which falls apart once a second monitor is attached -- both bars end
-up showing identical numbers regardless of which monitor a workspace actually
-lives on. This widget filters to the monitor each bar instance is drawn on, so
-each screen shows only its own workspaces, and marks the one that's actually
-active on that monitor with a solid accent-filled pill.
+Each bar shows only the workspaces that live on its own monitor, labelled
+with their real Hyprland workspace IDs, and marks the one active on that
+monitor with a solid accent-filled pill. Combined with the bindings in
+[i3-style global numbering](#i3-style-global-numbering-on-omarchy), no two
+monitors ever show the same number and Super+N always matches the label.
+
+Stock `omarchy.workspaces` instead numbers every monitor 1-10 on its own, so
+two monitors can both show `1`.
 
 ![i3-workspaces on two monitors: eDP-1 showing 1 2 3 with 2 active, HDMI-A-2 showing 4 active](demo.png)
 
@@ -40,13 +42,15 @@ If the stock `omarchy.workspaces` widget is still in that section too, take
 it out -- otherwise both render side by side and you get every workspace
 number twice.
 
-Reload the shell to pick up the change:
+Restart the shell to pick up the change:
 
 ```bash
-pkill -f "quickshell -n -p /usr/share/omarchy/shell"
+omarchy restart shell
 ```
 
-Quickshell relaunches on its own (this is normal on Omarchy).
+The shell logs "Local plugin changed, reloading" when a plugin file is saved,
+but a running bar can keep the old code until a restart, so restart after
+editing `Workspaces.qml` too.
 
 ## Remove
 
@@ -85,7 +89,49 @@ Set in the widget's entry in `shell.json`:
 
 | Key | Default | Meaning |
 | --- | --- | --- |
-| `maxWorkspaceId` | `10` | Highest workspace number shown. Workspace 10 always renders as `0`, matching Hyprland's default keybinds. |
+| `maxWorkspaceId` | `0` (no limit) | Highest workspace ID shown. `0` or less shows every workspace with a positive ID. Labels are the real Hyprland workspace IDs. |
+
+## i3-style global numbering on Omarchy
+
+Recent Omarchy versions give every monitor its own block of ten workspace
+IDs (1-10, 11-20, 21-30, ...), and Super+N goes to slot N on the focused
+monitor. This widget shows real IDs, so with those blocks a second monitor
+shows `11`, `21` and so on, which don't match the keys. With an upper limit of
+`10` (the old default) the widget filtered every workspace out and rendered
+nothing.
+
+For i3 behaviour, where Super+N always means workspace N on whichever monitor
+holds it, add this to `~/.config/hypr/bindings.lua`:
+
+```lua
+-- Stop Omarchy renumbering workspaces into per-monitor blocks on reload and
+-- hotplug. This overrides an Omarchy internal; recheck after `omarchy update`.
+o.workspaces.reconcile = function() end
+
+for workspace = 1, 10 do
+  local key = "code:" .. tostring(workspace + 9)
+  local ws = tostring(workspace)
+  o.rebind("SUPER + " .. key, "Switch to workspace " .. ws, hl.dsp.focus({ workspace = ws }))
+  o.rebind("SUPER + SHIFT + " .. key, "Move window to workspace " .. ws, hl.dsp.window.move({ workspace = ws }))
+  o.rebind("SUPER + SHIFT + ALT + " .. key, "Move window silently to workspace " .. ws, hl.dsp.window.move({ workspace = ws, follow = false }))
+end
+
+-- Move a workspace to another monitor without renumbering it.
+for _, dir in ipairs({ "l", "r", "u", "d" }) do
+  local name = ({ l = "LEFT", r = "RIGHT", u = "UP", d = "DOWN" })[dir]
+  o.rebind("SUPER + SHIFT + ALT + " .. name, "Move workspace to monitor " .. dir, hl.dsp.workspace.move({ monitor = dir }))
+end
+```
+
+Then run `hyprctl reload` and check `hyprctl configerrors`. Workspaces that
+are already open keep their block IDs until you renumber them, for example:
+
+```bash
+hyprctl dispatch 'hl.dsp.workspace.change_id({ workspace = "21", id = 1 })'
+```
+
+If you use a monitor plugin that pins workspaces to screens (such as Screens'
+"Assign by monitor"), turn that off or it may renumber workspaces again.
 
 ## How the per-monitor filtering works
 
