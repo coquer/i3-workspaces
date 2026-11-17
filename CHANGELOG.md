@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1](https://github.com/coquer/i3-workspaces/compare/v1.0.0...v1.0.1) (2026-11-17)
+
+
+### Bug Fixes
+
+* add support to latest omarchy ([c92209e](https://github.com/coquer/i3-workspaces/commit/c92209e89a31d9d76febd8f158748aa666d39804))
+* qualify Color singleton for Qt 6.12 ([eca05d4](https://github.com/coquer/i3-workspaces/commit/eca05d47d55427c2d984f88ebd96bca23a097ca2))
+
 ## 1.0.0 (2026-08-30)
 
 
