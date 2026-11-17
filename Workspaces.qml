@@ -11,7 +11,9 @@ BarWidget {
   id: root
   moduleName: "i3-workspaces"
 
-  readonly property int maxWorkspaceId: root.setting("maxWorkspaceId", 10)
+  readonly property int maxWorkspaceId: root.setting("maxWorkspaceId", 0)
+
+  function inRange(id) { return id > 0 && (root.maxWorkspaceId <= 0 || id <= root.maxWorkspaceId) }
 
   readonly property color activeColor: Color.accent
   readonly property color inactiveColor: Color.muted
@@ -105,7 +107,7 @@ BarWidget {
     for (var i = 0; i < values.length; i++) {
       var workspace = values[i]
       var id = workspace.id
-      if (id <= 0 || id > root.maxWorkspaceId) continue
+      if (!root.inRange(id)) continue
 
       if (mine !== "") {
         var owner = root.monitorNameOf(workspace)
@@ -117,7 +119,7 @@ BarWidget {
       if (ids.indexOf(id) === -1) ids.push(id)
     }
 
-    if (root.activeId > 0 && root.activeId <= root.maxWorkspaceId && ids.indexOf(root.activeId) === -1) ids.push(root.activeId)
+    if (root.inRange(root.activeId) && ids.indexOf(root.activeId) === -1) ids.push(root.activeId)
 
     ids.sort(function(left, right) { return left - right })
     return ids
